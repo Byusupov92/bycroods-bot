@@ -81,6 +81,13 @@ def finish_order(message):
 Город: {user['city']}
 Адрес: {user['address']}
 """
+def get_receipt(message):
+    if message.photo:
+        bot.forward_message(GROUP_ID, message.chat.id, message.message_id)
+        bot.send_message(message.chat.id, "✅ Чек получен! Мы проверим оплату и свяжемся с вами.")
+    else:
+        msg = bot.send_message(message.chat.id, "Пожалуйста, отправьте фото чека.")
+        bot.register_next_step_handler(msg, get_receipt)
 
     bot.send_message(GROUP_ID, text)
 
@@ -92,23 +99,17 @@ def finish_order(message):
         caption="💳 Для оплаты отсканируйте QR через Click / Payme / Paynet\n\nПосле оплаты отправьте сюда скриншот чека."
     )
 
-   
-
-
-
-def get_receipt(message):
-    if message.photo:
-        bot.forward_message(GROUP_ID, message.chat.id, message.message_id)
-        bot.send_message(message.chat.id, "✅ Чек получен! Мы проверим оплату и свяжемся с вами.")
-    else:
-        msg = bot.send_message(message.chat.id, "Пожалуйста, отправьте фото чека.")
-        bot.register_next_step_handler(msg, get_receipt)
-
- # ВАЖНО — ждём следующее сообщение ПОСЛЕ QR
+    # ВАЖНО — ждём следующее сообщение ПОСЛЕ QR
     bot.register_next_step_handler(sent, get_receipt)
+
+
+
+
+
 
 # ===== ЗАПУСК =====
 bot.polling(none_stop=True)
+
 
 
 
