@@ -91,7 +91,17 @@ def finish_order(message):
 
     bot.register_next_step_handler(message, get_receipt)
 
+def get_receipt(message):
+    if message.photo:
+        bot.forward_message(GROUP_ID, message.chat.id, message.message_id)
+        bot.send_message(message.chat.id, "✅ Чек получен! Мы проверим оплату и свяжемся с вами.")
+    else:
+        msg = bot.send_message(message.chat.id, "Пожалуйста, отправьте фото чека.")
+        bot.register_next_step_handler(msg, get_receipt)
+
+
 
 # ===== ЗАПУСК =====
 bot.polling(none_stop=True)
+
 
