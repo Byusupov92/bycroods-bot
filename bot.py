@@ -86,10 +86,15 @@ def finish_order(message):
 
     # ОТПРАВЛЯЕМ QR
     qr = open("qr.jpg", "rb")
-    bot.send_photo(message.chat.id, qr,
-                   caption="💳 Для оплаты отсканируйте QR через Click / Payme / Paynet\n\nПосле оплаты отправьте сюда скриншот чека.")
+    sent = bot.send_photo(
+        message.chat.id,
+        qr,
+        caption="💳 Для оплаты отсканируйте QR через Click / Payme / Paynet\n\nПосле оплаты отправьте сюда скриншот чека."
+    )
 
-    bot.register_next_step_handler(message, get_receipt)
+    # ВАЖНО — ждём следующее сообщение ПОСЛЕ QR
+    bot.register_next_step_handler(sent, get_receipt)
+
 
 def get_receipt(message):
     if message.photo:
@@ -103,5 +108,6 @@ def get_receipt(message):
 
 # ===== ЗАПУСК =====
 bot.polling(none_stop=True)
+
 
 
