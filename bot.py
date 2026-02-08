@@ -18,7 +18,7 @@ products = {
     },
     "2": {
         "name": "Luminous Dinosaurs",
-        "price": "95 000 сум",
+        "price": "96 000 сум",
         "photo": "https://images.uzum.uz/d4a0gk5sp2tr82i3ufng/t_product_540_high.jpg",
     },
     "3": {
@@ -108,6 +108,7 @@ def get_receipt(message):
 
 # ===== ЗАПУСК =====
 bot.polling(none_stop=True)
+
 
 
 
