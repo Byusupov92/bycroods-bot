@@ -83,7 +83,15 @@ def finish_order(message):
 """
 
     bot.send_message(GROUP_ID, text)
-    bot.send_message(message.chat.id, "✅ Заказ отправлен! Мы свяжемся с вами.")
+
+    # ОТПРАВЛЯЕМ QR
+    qr = open("qr.jpg", "rb")
+    bot.send_photo(message.chat.id, qr,
+                   caption="💳 Для оплаты отсканируйте QR через Click / Payme / Paynet\n\nПосле оплаты отправьте сюда скриншот чека.")
+
+    bot.register_next_step_handler(message, get_receipt)
+
 
 # ===== ЗАПУСК =====
 bot.polling(none_stop=True)
+
