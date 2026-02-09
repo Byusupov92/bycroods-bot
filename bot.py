@@ -83,7 +83,7 @@ def finish_order(message):
 """
 
 
-    bot.send_message(GROUP_ID, text)
+  
 
     # ОТПРАВЛЯЕМ QR
     qr = open("qr.jpg", "rb")
@@ -111,6 +111,7 @@ def get_receipt(message):
 
 # ===== ЗАПУСК =====
 bot.polling(none_stop=True)
+
 
 
 
