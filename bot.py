@@ -36,8 +36,6 @@ def start(message):
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("🛒 Заказать", callback_data=f"order_{key}"))
 
-        
-
         bot.send_photo(
             message.chat.id,
             item["photo"],
@@ -49,13 +47,10 @@ def start(message):
 @bot.callback_query_handler(func=lambda call: call.data.startswith("order_"))
 def start_order(call):
     product_id = call.data.split("_")[1]
-    user_data[call.from_user.id] = {"product": products[product_id]["name"]}
-
-   
-
-    msg = bot.send_message(call.message.chat.id, "Введите ваше имя:")
-    bot.register_next_step_handler(msg, get_name)
-
+    user_data[call.from_user.id] = {
+        "product": products[product_id]["name"],
+        "price": products[product_id]["price"]
+    }
 
     msg = bot.send_message(call.message.chat.id, "Введите ваше имя:")
     bot.register_next_step_handler(msg, get_name)
@@ -82,7 +77,7 @@ def choose_payment(message):
     markup = types.InlineKeyboardMarkup()
     markup.add(
         types.InlineKeyboardButton("💵 Наличными", callback_data="cash"),
-        types.InlineKeyboardButton("💳 QR Click", callback_data="qr")
+        types.InlineKeyboardButton("💳 QR Click ", callback_data="qr")
     )
 
     bot.send_message(message.chat.id, "Выберите способ оплаты:", reply_markup=markup)
