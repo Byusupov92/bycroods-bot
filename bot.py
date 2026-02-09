@@ -77,7 +77,7 @@ def choose_payment(message):
     markup = types.InlineKeyboardMarkup()
     markup.add(
         types.InlineKeyboardButton("💵 Наличными", callback_data="cash"),
-        types.InlineKeyboardButton("💳 QR Click / Payme / Paynet", callback_data="qr")
+        types.InlineKeyboardButton("💳 QR Click", callback_data="qr")
     )
 
     bot.send_message(message.chat.id, "Выберите способ оплаты:", reply_markup=markup)
@@ -114,7 +114,7 @@ def payment_handler(call):
         bot.send_photo(
             call.message.chat.id,
             qr,
-            caption="💳 Отсканируйте QR для оплаты.\nПосле оплаты отправьте сюда скриншот чека."
+            caption="💳 Отсканируйте QR для оплаты или по ссылки https://indoor.click.uz/pay?id=0068348&t=0.\nПосле оплаты отправьте сюда скриншот чека."
         )
 
 # ===== ПОЛУЧЕНИЕ ЧЕКА (ФОТО) =====
