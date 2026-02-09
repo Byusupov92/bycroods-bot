@@ -67,9 +67,24 @@ def start_order(call):
         caption="✍️ Введите ваше имя:"
     )
 
-    msg = bot.send_message(call.message.chat.id, "Напишите имя сообщением:")
+
+    msg = bot.send_message(call.message.chat.id, "Введите ваше имя:")
     bot.register_next_step_handler(msg, get_name)
 
+def get_name(message):
+    user_data[message.from_user.id]["name"] = message.text
+    msg = bot.send_message(message.chat.id, "Введите телефон:")
+    bot.register_next_step_handler(msg, get_phone)
+
+def get_phone(message):
+    user_data[message.from_user.id]["phone"] = message.text
+    msg = bot.send_message(message.chat.id, "Введите город:")
+    bot.register_next_step_handler(msg, get_city)
+
+def get_city(message):
+    user_data[message.from_user.id]["city"] = message.text
+    msg = bot.send_message(message.chat.id, "Введите адрес:")
+    bot.register_next_step_handler(msg, choose_payment)
 
 # ===== ВЫБОР ОПЛАТЫ =====
 def choose_payment(message):
