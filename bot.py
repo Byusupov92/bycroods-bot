@@ -6,10 +6,9 @@ TOKEN = os.getenv("BOT_TOKEN")
 GROUP_ID = -5208779977
 
 bot = telebot.TeleBot(TOKEN)
-
 user_data = {}
-user_state = {}
 
+# ===== ТОВАРЫ =====
 products = {
     "1": {
         "name": "Skeleton Dinosaurs",
@@ -47,98 +46,99 @@ def start(message):
 # ===== ВЫБОР ТОВАРА =====
 @bot.callback_query_handler(func=lambda call: call.data.startswith("order_"))
 def start_order(call):
-    user_id = call.from_user.id
     product_id = call.data.split("_")[1]
+    user_data[call.from_user.id] = {
+        "product": products[product_id]["name"],
+        "price": products[product_id]["price"]
+    }
 
-    user_data[user_id] = {"product": products[product_id]["name"]}
-    user_state[user_id] = "name"
+    msg = bot.send_message(call.message.chat.id, "Введите ваше имя:")
+    bot.register_next_step_handler(msg, get_name)
 
-    bot.send_message(call.message.chat.id, "Введите ваше имя:")
+def get_name(message):
+    user_data[message.from_user.id]["name"] = message.text
+    msg = bot.send_message(message.chat.id, "Введите телефон:")
+    bot.register_next_step_handler(msg, get_phone)
 
-# ===== ОБРАБОТКА ШАГОВ =====
-@bot.message_handler(content_types=['text', 'photo'])
-def handle_steps(message):
-    user_id = message.from_user.id
+def get_phone(message):
+    user_data[message.from_user.id]["phone"] = message.text
+    msg = bot.send_message(message.chat.id, "Введите город:")
+    bot.register_next_step_handler(msg, get_city)
 
-    if user_id not in user_state:
-        return
-
-    state = user_state[user_id]
-
-    if state == "name":
-        user_data[user_id]["name"] = message.text
-        user_state[user_id] = "phone"
-        bot.send_message(message.chat.id, "Введите телефон:")
-
-    elif state == "phone":
-        user_data[user_id]["phone"] = message.text
-        user_state[user_id] = "city"
-        bot.send_message(message.chat.id, "Введите город:")
-
-    elif state == "city":
-        user_data[user_id]["city"] = message.text
-        user_state[user_id] = "address"
-        bot.send_message(message.chat.id, "Введите адрес:")
-
-    elif state == "address":
-        user_data[user_id]["address"] = message.text
-        user_state[user_id] = "payment"
-
-        markup = types.InlineKeyboardMarkup()
-        markup.add(types.InlineKeyboardButton("💳 Click / Payme / Paynet", callback_data="pay_qr"))
-        markup.add(types.InlineKeyboardButton("💵 Наличными при получении", callback_data="pay_cash"))
-
-        bot.send_message(message.chat.id, "Выберите способ оплаты:", reply_markup=markup)
+def get_city(message):
+    user_data[message.from_user.id]["city"] = message.text
+    msg = bot.send_message(message.chat.id, "Введите адрес:")
+    bot.register_next_step_handler(msg, choose_payment)
 
 # ===== ВЫБОР ОПЛАТЫ =====
-@bot.callback_query_handler(func=lambda call: call.data.startswith("pay_"))
-def payment_choice(call):
-    user_id = call.from_user.id
+def choose_payment(message):
+    user_data[message.from_user.id]["address"] = message.text
 
-    if call.data == "pay_cash":
-        send_order_to_group(user_id, "Наличными")
+    markup = types.InlineKeyboardMarkup()
+    markup.add(
+        types.InlineKeyboardButton("💵 Наличными", callback_data="cash"),
+        types.InlineKeyboardButton("💳 QR Click / Payme / Paynet", callback_data="qr")
+    )
+
+    bot.send_message(message.chat.id, "Выберите способ оплаты:", reply_markup=markup)
+
+# ===== ОБРАБОТКА ВЫБОРА ОПЛАТЫ =====
+@bot.callback_query_handler(func=lambda call: call.data in ["cash", "qr"])
+def payment_handler(call):
+    user = user_data.get(call.from_user.id)
+
+    if not user:
+        return
+
+    order_text = f"""
+🛒 Новый заказ BY_Croods
+
+Товар: {user['product']}
+Цена: {user['price']}
+Имя: {user['name']}
+Телефон: {user['phone']}
+Город: {user['city']}
+Адрес: {user['address']}
+"""
+
+    # ===== НАЛИЧНЫЕ =====
+    if call.data == "cash":
+        bot.send_message(GROUP_ID, order_text + "\n💵 Оплата: Наличными")
         bot.send_message(call.message.chat.id, "✅ Заказ принят! Мы скоро свяжемся с вами.")
-        user_state.pop(user_id)
-        user_data.pop(user_id)
 
-    elif call.data == "pay_qr":
-        user_state[user_id] = "receipt"
+    # ===== QR ОПЛАТА =====
+    if call.data == "qr":
+        user["waiting_receipt"] = True
 
         qr = open("qr.jpg", "rb")
         bot.send_photo(
             call.message.chat.id,
             qr,
-            caption="Отсканируйте QR для оплаты.\nПосле оплаты отправьте фото чека."
+            caption="💳 Отсканируйте QR для оплаты.\nПосле оплаты отправьте сюда скриншот чека."
         )
 
-# ===== ПРИЁМ ЧЕКА =====
+# ===== ПОЛУЧЕНИЕ ЧЕКА (ФОТО) =====
 @bot.message_handler(content_types=['photo'])
 def get_receipt(message):
-    user_id = message.from_user.id
+    user = user_data.get(message.from_user.id)
 
-    if user_id in user_state and user_state[user_id] == "receipt":
-        bot.forward_message(GROUP_ID, message.chat.id, message.message_id)
-        send_order_to_group(user_id, "Оплачено по QR")
-
-        bot.send_message(message.chat.id, "✅ Чек получен! Мы скоро свяжемся с вами.")
-        user_state.pop(user_id)
-        user_data.pop(user_id)
-
-# ===== ОТПРАВКА ЗАКАЗА =====
-def send_order_to_group(user_id, payment_type):
-    user = user_data[user_id]
-
-    text = f"""
-🛒 Новый заказ BY_Croods
+    if user and user.get("waiting_receipt"):
+        order_text = f"""
+🛒 Новый заказ BY_Croods (QR оплачен)
 
 Товар: {user['product']}
+Цена: {user['price']}
 Имя: {user['name']}
 Телефон: {user['phone']}
 Город: {user['city']}
 Адрес: {user['address']}
-Оплата: {payment_type}
 """
-    bot.send_message(GROUP_ID, text)
+
+        bot.send_message(GROUP_ID, order_text)
+        bot.forward_message(GROUP_ID, message.chat.id, message.message_id)
+
+        bot.send_message(message.chat.id, "✅ Чек получен! Мы проверим оплату и свяжемся с вами.")
+        user["waiting_receipt"] = False
 
 # ===== ЗАПУСК =====
 bot.polling(none_stop=True)
