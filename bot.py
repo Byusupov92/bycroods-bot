@@ -150,7 +150,7 @@ def payment_handler(call):
         bot.send_photo(
             call.message.chat.id,
             qr,
-            caption="Оплатите по QR.\nПосле оплаты отправьте скрин чека."
+            caption="Оплатите по QR. https://indoor.click.uz/pay?id=0068348&t=0\nПосле оплаты отправьте скрин чека."
         )
 
 # ===== ПОЛУЧЕНИЕ ЧЕКА =====
@@ -174,7 +174,7 @@ def finish_order(user_id, paid, payment_type):
     products[product_id]["stock"] -= qty
 
     text = f"""
-🛒 Новый заказ BY_Croods
+🛒 Новый заказ Телеграм BY_Croods
 
 Товар: {user['product']}
 Количество: {qty} шт
