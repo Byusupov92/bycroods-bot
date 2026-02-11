@@ -36,25 +36,31 @@ products = {
 def start(message):
     args = message.text.split()
 
-    # Если пришли с сайта
     if len(args) > 1:
         decoded = base64.b64decode(args[1]).decode("utf-8")
-        product, name, phone, city, address = decoded.split("|")
+        product, name, phone, city, address, qty = decoded.split("|")
 
         user_data[message.from_user.id] = {
             "product": product,
             "name": name,
             "phone": phone,
             "city": city,
-            "address": address
+            "address": address,
+            "qty": int(qty),
+            "price": 0
         }
+
+        # ищем товар в списке
+        for key, item in products.items():
+            if item["name"] == product:
+                user_data[message.from_user.id]["product_id"] = key
+                user_data[message.from_user.id]["price"] = item["price"]
 
         choose_payment(message)
         return
 
-    # Обычный старт
     bot.send_message(message.chat.id, "🦖 Добро пожаловать в магазин BY_Croods!")
-    bot.send_message(message.chat.id, "🦖 Витрина BY_Croods")
+
 
     for key, item in products.items():
         markup = types.InlineKeyboardMarkup()
