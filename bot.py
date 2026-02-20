@@ -3,8 +3,6 @@ from telebot import types
 import os
 from flask import Flask, request, jsonify
 import threading
-from flask import Flask, request, jsonify
-import threading
 
 TOKEN = os.getenv("BOT_TOKEN")
 GROUP_ID = -5208779977
@@ -57,4 +55,5 @@ def run_bot():
 threading.Thread(target=run_bot).start()
 
 app.run(host="0.0.0.0", port=8080)
+
 
