@@ -14,7 +14,7 @@ CORS(app)  # ← ВАЖНО
 
 # ===== ТОВАРЫ =====
 products = {
-    "Skeleton Dinosaurs": {"price": 145000, "stock": 0},
+    "Skeleton Dinosaurs": {"price": 145000, "stock": 6},
     "Luminous Dinosaurs": {"price": 96000, "stock": 0},
     "Dino Park": {"price": 95000, "stock": 15},
 }
@@ -65,4 +65,5 @@ def run_bot():
 
 if __name__ == "__main__":
     threading.Thread(target=run_bot).start()
+
 
