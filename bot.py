@@ -240,6 +240,14 @@ products = {
     "Skeleton Dinosaurs": {"price": 145000, "stock": 6},
     "Luminous Dinosaurs": {"price": 96000, "stock": 0},
     "Dino Park": {"price": 95000, "stock": 15},
+    "Jurassic Discovery Triceratops": {"price": 199000, "stock": 3},
+    "Jurassic Discovery Mammoth": {"price": 199000, "stock": 2},
+    "Jurassic Discovery Velociraptor": {"price": 199000, "stock": 2},
+    "Jurassic Discovery Spinosaurus": {"price": 199000, "stock": 2},
+    "Jurassic Discovery Pterodactyl ": {"price": 199000, "stock": 2},
+    
+    
+    
 }
 
 # ===== САЙТ ОТПРАВЛЯЕТ ЗАКАЗ =====
@@ -288,6 +296,7 @@ def run_bot():
 
 if __name__ == "__main__":
     threading.Thread(target=run_bot).start()
+
 
 
 
